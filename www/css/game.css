@@ -1,0 +1,13 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+/*canvas {
+	position: absolute;
+	top: 50%;
+	margin-top: -160px;
+	left: 50%;
+	margin-left: -230px;
+}*/

@@ -1,0 +1,28 @@
+{
+  "name": "codinweek1",
+  "version": "0.0.0",
+  "description": "Codinweek1",
+  "main": "server/server.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/qkdreyer/codinweek1.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/qkdreyer/codinweek1/issues"
+  },
+  "dependencies": {
+    "express": "",
+    "socket.io": "",
+    "node-uuid": "",
+    "bower": "",
+    "underscore": ""
+  }
+}

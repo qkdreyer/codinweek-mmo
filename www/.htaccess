@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+    Options +FollowSymlinks
+    RewriteEngine On
+    RewriteRule socket/(.*) http://localhost:8200/$1
+</IfModule>
