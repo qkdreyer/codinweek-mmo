@@ -1,28 +1,21 @@
 (function(exports) {
     exports.socket = {
         io: null,
-        protocol: "http",
-        host: "localhost",
-        port: 8200,
         debug: false,
         log: function() {
             if (this.debug) console.log.apply(console, arguments);
         },
-        url: function() {
-            return this.protocol + "://" + this.host + ":" + this.port;
-        },
         init: function() {
             if (typeof exports.io === "undefined") return false;
             
-            var url = this.url();
             var self = this;
-            this.log('Connecting to Server', url);
             
-            this.io = socket = io.connect(url);
-            console.log(url, socket);
+            this.io = io.connect();
+            this.log('Connecting to Server');
 
             // When current client is connected
-            socket.on('connection', function (data) {
+
+            this.io.on('connection', function (data) {
                 player.userid = data.userid;
                 players[data.userid] = player;
 
@@ -37,12 +30,12 @@
             });
 
             // When another client is connected
-            socket.on('client_connected', function (player_data) {
+            this.io.on('client_connected', function (player_data) {
                 self.log('client_connected', player_data);
             });
 
             // When current client id disconnected
-            socket.on('client_disconnected', function (player_data) {
+            this.io.on('client_disconnected', function (player_data) {
                 var player_id = player_data.userid;
                 self.log('client_disconnected', player_id, player_data);
 
@@ -52,7 +45,7 @@
                 }
             });
 
-            socket.on('client_moved', function(player_data) {
+            this.io.on('client_moved', function(player_data) {
                 var player_id = player_data.id;
                 self.log('client_moved', player_id, player_data);
 
@@ -63,14 +56,14 @@
                 
             });
 
-            socket.on('server_data', function(server_data) {
+            this.io.on('server_data', function(server_data) {
                 var ennemies_data = server_data[0];
                 var items_data = server_data[1];
                 
                 Ennemy.handle_server_data(ennemies_data);
             });
 
-            socket.on('server_start', function() {
+            this.io.on('server_start', function() {
                 /*console.log("ss");
                 for (var p in players) {
                     if (p != players[p]) {
@@ -84,8 +77,7 @@
 
         sync: function(player) {
             var player_data = player.serialize();
-            socket.io.emit('client_moved', player_data);
-            
+            this.io.emit('client_moved', player_data);
             this.log("player_moved", player_data);
         }
     };

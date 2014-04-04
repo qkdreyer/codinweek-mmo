@@ -83,7 +83,6 @@ Ennemy.prototype.update = function()
     for (var p in players) {
         var player = players[p];
         game.physics.arcade.collide(self.sprite, player.sprite, function() {
-            debugger;
             player.lostHp(20);
             var angle = touchingEvent(self.sprite);
             socket.io.emit('ennemyHit', {ennemy_id: self.id, angle: angle});

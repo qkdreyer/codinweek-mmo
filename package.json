@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Codinweek1",
   "main": "server/server.js",
+  "start": {
+    "server": "node server/server.js"
+  },
   "directories": {
     "doc": "doc"
   },
@@ -19,10 +22,9 @@
     "url": "https://github.com/qkdreyer/codinweek1/issues"
   },
   "dependencies": {
-    "express": "",
-    "socket.io": "",
+    "express.io": "",
     "node-uuid": "",
-    "bower": "",
-    "underscore": ""
+    "underscore": "",
+    "bower": ""
   }
 }

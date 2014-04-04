@@ -1,52 +1,65 @@
-var express = require('express');
-var app = express();
-var server = app.listen(8200);
-var io = require('socket.io').listen(server);
+var express = require('express.io');
 var uuid = require('node-uuid');
 var util = require('util');
 var _ = require('underscore');
+
+var app = express();
+var port = 8200;
+var server = app.http().io().listen(port);
 
 var clients = {};
 var clients_count = 0;
 var log_level = 1;
 
-io.sockets.on('connection', function (socket) {
+app.get(/^(?!.*\.map$)/, function(req, res) {
+	res.sendfile(__dirname + '/www/' + req.url);
+}),
+console.log('Server listening at localhost:' + port);
+
+app.io.route('connection', function (req) {
 	// generate unique userid
 	var userid = uuid();
-	socket.userid = userid;
+	req.userid = userid;
 	clients_count++;
      
     //assigning client to userid
-    socket.emit('connection', {userid: userid, clients: clients});
+    req.io.emit('connection', {userid: userid, clients: clients});
 	console.log('client connected', userid, clients_count);
 
     //notifying other clients of client connection
-    socket.broadcast.emit('client_connected', {userid: userid});
+    req.io.broadcast('client_connected', {userid: userid});
 
-	socket.on('client_moved', function (player_data) {
+	req.io.route('client_moved', function (player_data) {
 		clients[player_data.id] = player_data;
-		socket.broadcast.emit('client_moved', player_data);
+		req.broadcast.emit('client_moved', player_data);
 	});
 
-	socket.on('disconnect', function () {
-		console.log('client disconnected', socket.userid, clients_count);
-		delete clients[socket.userid];
+	req.io.route('disconnect', function () {
+		console.log('client disconnected', req.userid, clients_count);
+		delete clients[req.userid];
 		clients_count--;
-		io.sockets.emit('client_disconnected', {userid: socket.userid});
+		io.reqs.emit('client_disconnected', {userid: req.userid});
 	});
 
-	socket.on('missileHit', handle_ennemy_hit);
-	socket.on('playerHit', handle_ennemy_collision.bind(socket, 1));
-	socket.on('ennemyHit', handle_ennemy_collision.bind(socket, 2));
-	socket.on('obstacleHit', handle_ennemy_collision.bind(socket, 3));
+	req.io.route('missileHit', handle_ennemy_hit);
+	req.io.route('playerHit', handle_ennemy_collision.bind(req, 1));
+	req.io.route('ennemyHit', handle_ennemy_collision.bind(req, 2));
+	req.io.route('obstacleHit', handle_ennemy_collision.bind(req, 3));
 
-	//socket.set("heartbeat timeout", 10);
-	//socket.set("heartbeat interval", 5);
+	//req.set("heartbeat timeout", 10);
+	//req.set("heartbeat interval", 5);
 });
 
-io.sockets.emit("server_start");
+/*
+req.io.join(room) - The client for the request joins room.
+req.io.leave(room) - The client for the request leaves room.
+req.io.room(room).broadcast(event, data) - Broadcast to all client in the room except for the current one.
+app.io.room(room).broadcast(event, data) - Broadcast to all clients in the room.
+*/
 
-io.set('log level', log_level);
+app.io.broadcast("server_start");
+
+app.io.set('log level', log_level);
 
 var game_loop = 0;
 var ennemies_data = {}
@@ -137,7 +150,7 @@ var generate_server_data = function() {
 	server_data[0] = ennemies_data;
 	server_data[1] = other_data;
 
-	io.sockets.emit('server_data', server_data);
+	app.io.broadcast('server_data', server_data);
 }
 
 setInterval(generate_server_data, 50);
